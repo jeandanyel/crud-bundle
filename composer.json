@@ -1,0 +1,13 @@
+{
+    "name": "jeandanyel/crud-bundle",
+    "autoload": {
+        "psr-4": {
+            "Jeandanyel\\CrudBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Jeandanyel\\CrudBundle\\Tests\\": "tests/"
+        }
+    }
+}
