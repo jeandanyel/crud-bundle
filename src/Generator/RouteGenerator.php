@@ -3,9 +3,9 @@
 namespace Jeandanyel\CrudBundle\Generator;
 
 use Jeandanyel\CrudBundle\Controller\CrudControllerInterface;
-use Jeandanyel\Routing\RoutePath;
+use Jeandanyel\CrudBundle\Enum\CrudRoutePath;
+use Jeandanyel\CrudBundle\Helper\ControllerHelper;
 use Symfony\Component\Routing\Route;
-use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 
 class RouteGenerator implements RouteGeneratorInterface {
     public function generate(CrudControllerInterface $controller, string $methodName): Route
@@ -18,35 +18,15 @@ class RouteGenerator implements RouteGeneratorInterface {
 
     public function getName(CrudControllerInterface $controller, string $methodName): string
     {
-        return sprintf('crud_%s_%s', $this->getPrefix($controller), $methodName);
+        $controllerName = ControllerHelper::getName($controller);
+
+        return sprintf('crud_%s_%s', $controllerName, $methodName);
     }
 
     private function getPath(CrudControllerInterface $controller, string $methodName): string
     {        
-        return sprintf('/%s%s', $this->getPrefix($controller), RoutePath::get($methodName));
-    }
+        $controllerName = ControllerHelper::getName($controller);
 
-    private function getPrefix(CrudControllerInterface $controller): string
-    {
-        static $prefix = [];
-
-        if (empty($prefix[$controller::class])) {
-            $reflectionClass = $this->getReflectionClass($controller);
-            $converter = new CamelCaseToSnakeCaseNameConverter();
-            $prefix[$controller::class]= $converter->normalize(str_replace('Controller', '', $reflectionClass->getShortName()));
-        }
-
-        return $prefix[$controller::class];
-    }
-
-    private function getReflectionClass(CrudControllerInterface $controller): \ReflectionClass
-    {
-        static $reflections = [];
-
-        if (empty($reflections[$controller::class])) {
-            $reflections[$controller::class] = new \ReflectionClass($controller);
-        }
-
-        return $reflections[$controller::class];
+        return sprintf('/%s%s', $controllerName, CrudRoutePath::get($methodName));
     }
 }

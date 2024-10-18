@@ -9,5 +9,8 @@
         "psr-4": {
             "Jeandanyel\\CrudBundle\\Tests\\": "tests/"
         }
+    },
+    "require": {
+        "symfony/translation": "^7.1"
     }
 }

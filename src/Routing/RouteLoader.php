@@ -41,8 +41,9 @@ class RouteLoader extends Loader
                 $attributes = $reflectionMethod->getAttributes(Route::class);
 
                 if (empty($attributes)) {
-                    $route = $this->routeGenerator->generate($controller, $reflectionMethod->getName());
-                    $routeName = $this->routeGenerator->getName($controller, $reflectionMethod->getName());
+                    $methodName = $reflectionMethod->getName();
+                    $route = $this->routeGenerator->generate($controller, $methodName);
+                    $routeName = $this->routeGenerator->getName($controller, $methodName);
 
                     $routes->add($routeName, $route);
                 }
