@@ -1,7 +1,7 @@
 {
     "name": "jeandanyel/crud-bundle",
-    "minimum-stability": "stable",
-    "prefer-stable": true,
+    "license": "MIT",
+    "description": "A flexible Symfony bundle that provides automatic generation of Create, Read, Update, and Delete actions for entities, along with list management and customizable templates.",
     "autoload": {
         "psr-4": {
             "Jeandanyel\\CrudBundle\\": "src/"
@@ -27,8 +27,18 @@
     },
     "extra": {
         "symfony": {
-            "allow-contrib": false,
+            "allow-contrib": true,
             "require": "^6.4 || ^7.0"
         }
-    }
+    },
+    "support": {
+        "issues": "https://github.com/jeandanyel/crud-bundle/issues"
+    },
+    "authors": [
+        {
+            "name": "Jean-Danyel Routhier",
+            "email": "jeandanyel.routhier@gmail.com",
+            "role": "Developer"
+        }
+    ]
 }
