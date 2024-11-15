@@ -4,23 +4,36 @@ namespace Jeandanyel\CrudBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Jeandanyel\CrudBundle\Enum\CrudTemplate;
+use Jeandanyel\CrudBundle\Enum\CrudTemplatePath;
 use Jeandanyel\CrudBundle\Helper\ControllerHelper;
+use Jeandanyel\ListBundle\Factory\ListFactoryInterface;
+use Jeandanyel\ListBundle\List\ListInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Service\Attribute\Required;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 abstract class AbstractCrudController extends AbstractController implements CrudControllerInterface
 {
-    public function __construct(
-        private EntityManagerInterface $entityManager,
-        private TranslatorInterface $translator,
-    ) {}
+    protected EntityManagerInterface $entityManager;
+    protected ListFactoryInterface $listFactory;
+    protected TranslatorInterface $translator;
 
     public function list(Request $request): Response
     {
-        return new Response();
+        $list = $this->createList($this->getListTypeClass());
+        $controllerName = ControllerHelper::getName($this);
+        $templatePath = sprintf('%s/%s', $controllerName, CrudTemplatePath::LIST->getFileName());
+
+        if (!$this->container->get('twig')->getLoader()->exists($templatePath)) {
+            $templatePath = CrudTemplatePath::LIST->value;
+        }
+
+        return $this->render($templatePath, [
+            'controller_name' => $controllerName,
+            'list' => $list->createView(),
+        ]);
     }
 
     public function create(Request $request): Response
@@ -48,13 +61,13 @@ abstract class AbstractCrudController extends AbstractController implements Crud
             return $this->redirectToRoute("crud_{$controllerName}_edit", ['id' => $entity->getId()]);
         }
 
-        $template = sprintf('%s/%s', $controllerName, CrudTemplate::UPDATE->getFileName());
+        $templatePath = sprintf('%s/%s', $controllerName, CrudTemplatePath::UPDATE->getFileName());
 
-        if (!$this->container->get('twig')->getLoader()->exists($template)) {
-            $template = CrudTemplate::UPDATE->value;
+        if (!$this->container->get('twig')->getLoader()->exists($templatePath)) {
+            $templatePath = CrudTemplatePath::UPDATE->value;
         }
 
-        return $this->render($template, [
+        return $this->render($templatePath, [
             $controllerName => $entity,
             'controller_name' => $controllerName,
             'form' => $form->createView(),
@@ -65,7 +78,15 @@ abstract class AbstractCrudController extends AbstractController implements Crud
     {
         $entity = $this->findEntity($request);
 
+        $this->entityManager->remove($entity);
+        $this->entityManager->flush();
+
         return new Response();
+    }
+
+    protected function createList(string $listTypeClass, array $options = []): ListInterface
+    {
+        return $this->listFactory->create($listTypeClass, $options);
     }
 
     protected function findEntity(Request $request): object
@@ -97,5 +118,28 @@ abstract class AbstractCrudController extends AbstractController implements Crud
     protected function getFormTypeClass(): string
     {
         return ControllerHelper::getCrudControllerAttribute($this)->getFormTypeClass();
+    }
+
+    protected function getListTypeClass(): string
+    {
+        return ControllerHelper::getCrudControllerAttribute($this)->getListTypeClass();
+    }
+
+    #[Required]
+    public function setEntityManager(EntityManagerInterface $entityManager): void
+    {
+        $this->entityManager = $entityManager;
+    }
+
+    #[Required]
+    public function setListFactory(ListFactoryInterface $listFactory): void
+    {
+        $this->listFactory = $listFactory;
+    }
+
+    #[Required]
+    public function setTranslator(TranslatorInterface $translator): void
+    {
+        $this->translator = $translator;
     }
 }

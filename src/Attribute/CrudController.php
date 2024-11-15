@@ -9,7 +9,8 @@ class CrudController
 {
     public function __construct(
         public string $entityClass,
-        public string $formTypeClass
+        public string $formTypeClass,
+        public string $listTypeClass,
     ) {
         // TODO: fix this...
         // if (!is_subclass_of(get_called_class(), CrudControllerInterface::class)) {
@@ -25,5 +26,10 @@ class CrudController
     public function getFormTypeClass(): string
     {
         return $this->formTypeClass;
+    }
+
+    public function getListTypeClass(): string
+    {
+        return $this->listTypeClass;
     }
 }

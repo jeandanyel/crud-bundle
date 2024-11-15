@@ -2,7 +2,7 @@
 
 namespace Jeandanyel\CrudBundle\Enum;
 
-enum CrudTemplate: string
+enum CrudTemplatePath: string
 {
     case LIST = '@JeandanyelCrud/crud/list.html.twig';
     case CREATE = '@JeandanyelCrud/crud/create.html.twig';
