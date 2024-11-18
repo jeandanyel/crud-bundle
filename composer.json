@@ -13,22 +13,22 @@
         }
     },
     "require": {
-        "php": "^8.0",
+        "php": "^8.2",
         "doctrine/dbal": "^3",
         "doctrine/doctrine-bundle": "^2.12",
         "doctrine/orm": "^3.1",
-        "symfony/translation": "^6.4|^7.0",
-        "symfony/asset": "^6.4|^7.0",
-        "symfony/form": "^6.4|^7.0",
-        "symfony/framework-bundle": "^6.4|^7.0",
-        "symfony/twig-bundle": "^6.4|^7.0",
+        "symfony/translation": "^6.4 || ^7.1",
+        "symfony/asset": "^6.4 || ^7.1",
+        "symfony/form": "^6.4 || ^7.1",
+        "symfony/framework-bundle": "^6.4 || ^7.1",
+        "symfony/twig-bundle": "^6.4 || ^7.1",
         "twig/twig": "^2.12|^3.0",
         "jeandanyel/list-bundle": "^0.1"
     },
     "extra": {
         "symfony": {
             "allow-contrib": true,
-            "require": "^6.4 || ^7.0"
+            "require": "^6.4 || ^7.1"
         }
     },
     "support": {
