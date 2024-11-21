@@ -52,3 +52,40 @@ For example, if you want to create a custom template for the `Article` entity an
 | `AbstractCrudController::create` | crud_{entity}_create        | /{entity}/create      | [@JeandanyelCrud/crud/create.html.twig](../templates/crud/create.html.twig) |
 | `AbstractCrudController::update` | crud_{entity}_update        | /{entity}/update/{id} | [@JeandanyelCrud/crud/update.html.twig](../templates/crud/update.html.twig) |
 | `AbstractCrudController::delete` | crud_{entity}_delete        | /{entity}/delete/{id} | -                                                              |
+
+
+## Events
+
+The CRUD includes events that allow developers to hook into specific CRUD actions, such as saving an entity. These events are dispatched during CRUD operations and can be used to perform additional logic or validations.
+
+### Available events
+
+| Event Name              | Description                                       |
+|-------------------------|---------------------------------------------------|
+| [`EntityBeforeSaveEvent`](./src/Event/EntityBeforeSaveEvent.php) | Triggered **before** an entity is saved to the database. |
+| [`EntityAfterSaveEvent`](./src/Event/EntityAfterSaveEvent.php)  | Triggered **after** an entity has been saved to the database. |
+
+### Usage example
+
+The following example demonstrates how to use `EntityBeforeSaveEvent` to perform operations before an entity is saved:
+
+```php
+namespace App\EventListener;
+
+use App\Entity\Article;
+use Jeandanyel\CrudBundle\Event\EntityBeforeSaveEvent;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+
+#[AsEventListener(EntityBeforeSaveEvent::class)]
+class ArticleCrudBeforeSaveListener 
+{
+    public function __invoke(EntityBeforeSaveEvent $event)
+    {
+        $entity = $event->getEntity();
+
+        if ($entity instanceof Article) {
+            // Perform operations before saving the Article entity.
+        }
+    }
+}
+```
