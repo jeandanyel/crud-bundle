@@ -5,12 +5,15 @@ namespace Jeandanyel\CrudBundle\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Jeandanyel\CrudBundle\Enum\CrudTemplatePath;
+use Jeandanyel\CrudBundle\Event\EntityAfterSaveEvent;
+use Jeandanyel\CrudBundle\Event\EntityBeforeSaveEvent;
 use Jeandanyel\CrudBundle\Helper\ControllerHelper;
 use Jeandanyel\ListBundle\Factory\ListFactoryInterface;
 use Jeandanyel\ListBundle\List\ListInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -18,6 +21,7 @@ abstract class AbstractCrudController extends AbstractController implements Crud
 {
     protected EntityManagerInterface $entityManager;
     protected ListFactoryInterface $listFactory;
+    protected EventDispatcherInterface $eventDispather;
     protected TranslatorInterface $translator;
 
     public function list(Request $request): Response
@@ -38,7 +42,40 @@ abstract class AbstractCrudController extends AbstractController implements Crud
 
     public function create(Request $request): Response
     {
-        return new Response();
+        $entityClass = $this->getEntityClass();
+        $entity = new $entityClass();
+        $controllerName = ControllerHelper::getName($this);
+        $form = $this->createForm($this->getFormTypeClass(), $entity);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->eventDispather->dispatch(new EntityBeforeSaveEvent($this, $entity, $request, $form));
+
+            $this->entityManager->persist($entity);
+            $this->entityManager->flush();
+
+            $this->eventDispather->dispatch(new EntityAfterSaveEvent($this, $entity, $request, $form));
+
+            $this->addFlash('success', $this->translator->trans(
+                "{$controllerName}.messages.has_been_created",
+                ['%name%' => $entity]
+            ));
+
+            return $this->redirectToRoute("crud_{$controllerName}_created", ['id' => $entity->getId()]);
+        }
+
+        $templatePath = sprintf('%s/%s', $controllerName, CrudTemplatePath::CREATE->getFileName());
+
+        if (!$this->container->get('twig')->getLoader()->exists($templatePath)) {
+            $templatePath = CrudTemplatePath::CREATE->value;
+        }
+
+        return $this->render($templatePath, [
+            $controllerName => $entity,
+            'controller_name' => $controllerName,
+            'form' => $form->createView(),
+        ]);
     }
 
     public function update(Request $request): Response
@@ -50,15 +87,19 @@ abstract class AbstractCrudController extends AbstractController implements Crud
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->eventDispather->dispatch(new EntityBeforeSaveEvent($this, $entity, $request, $form));
+
             $this->entityManager->persist($entity);
             $this->entityManager->flush();
+
+            $this->eventDispather->dispatch(new EntityAfterSaveEvent($this, $entity, $request, $form));
 
             $this->addFlash('success', $this->translator->trans(
                 "{$controllerName}.messages.has_been_updated",
                 ['%name%' => $entity]
             ));
 
-            return $this->redirectToRoute("crud_{$controllerName}_edit", ['id' => $entity->getId()]);
+            return $this->redirectToRoute("crud_{$controllerName}_update", ['id' => $entity->getId()]);
         }
 
         $templatePath = sprintf('%s/%s', $controllerName, CrudTemplatePath::UPDATE->getFileName());
@@ -135,6 +176,12 @@ abstract class AbstractCrudController extends AbstractController implements Crud
     public function setListFactory(ListFactoryInterface $listFactory): void
     {
         $this->listFactory = $listFactory;
+    }
+
+    #[Required]
+    public function setEventDispatcher(EventDispatcherInterface $eventDispather): void
+    {
+        $this->eventDispather = $eventDispather;
     }
 
     #[Required]
