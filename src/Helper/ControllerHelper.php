@@ -2,7 +2,6 @@
 
 namespace Jeandanyel\CrudBundle\Helper;
 
-
 use Jeandanyel\CrudBundle\Attribute\CrudController;
 use Jeandanyel\CrudBundle\Controller\CrudControllerInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
