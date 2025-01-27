@@ -2,9 +2,10 @@
 
 namespace Jeandanyel\CrudBundle\Helper;
 
-use ApiPlatform\Metadata\Util\CamelCaseToSnakeCaseNameConverter;
+
 use Jeandanyel\CrudBundle\Attribute\CrudController;
 use Jeandanyel\CrudBundle\Controller\CrudControllerInterface;
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 
 class ControllerHelper {
     public static function getName(CrudControllerInterface $controller): string
